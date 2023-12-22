@@ -84,14 +84,47 @@ void test_multiple_key_types() {
     value = find_entry(btree, &byte_key, sizeof(byte_key));
     assert(value != NULL);
     assert(memcmp(value->value, "value_4", sizeof("value_4")) == 0);
+
+    free_tree(&btree);
 }
 
+void test_add_custom_struct() {
+    btree_t* btree = new_btree();
+    typedef struct custom_key {
+        uint32_t key;
+        uint32_t key2;
+    }custom_key_t;
+
+    custom_key_t key = {1, 2};
+    add_entry(btree, &key, sizeof(key), "value_1", sizeof("value_1"));
+    value_t* value = find_entry(btree, &key, sizeof(key));
+    assert(value != NULL);
+    assert(memcmp(value->value, "value_1", sizeof("value_1")) == 0);
+    free_tree(&btree);
+}
+
+void test_add_custom_struct_to_value() {
+    btree_t* btree = new_btree();
+    typedef struct custom_value {
+        uint32_t value;
+        uint32_t value2;
+    }custom_value_t;
+
+    custom_value_t c_value = {1, 2};
+    add_entry(btree, "key_1", sizeof("key_1"), &c_value, sizeof(c_value));
+    value_t* value = find_entry(btree, "key_1", sizeof("key_1"));
+    assert(value != NULL);
+    assert(memcmp(value->value, &c_value, sizeof(c_value)) == 0);
+    free_tree(&btree);
+}
 
 int main() {
     test_add_entry();
     test_entry_list();
     test_remove_entry();
     test_multiple_key_types();
+    test_add_custom_struct();
+    test_add_custom_struct_to_value();
     printf("All tests passed!\n");
     return 0;
 }
