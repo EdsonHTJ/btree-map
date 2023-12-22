@@ -19,7 +19,9 @@ struct btree {
 
 
 void* WEAK btree_malloc(size_t size) {
-    return malloc(size);
+    void* ptr = malloc(size);
+    memset(ptr, 0, size);
+    return ptr;
 }
 
 void WEAK btree_free(void* ptr) {
@@ -70,6 +72,19 @@ node_t* new_node(void* key, size_t key_len, void* value, size_t value_len) {
     return node;
 }
 
+void free_node(node_t* self) {
+    if (self == NULL) {
+        return;
+    }
+
+    btree_free(self->value.value);
+
+    free_node(self->child_left);
+    free_node(self->child_right);
+
+    btree_free(self);
+}
+
 void add_node(node_t* self, node_t* n_node) {
     if (n_node->key_hash > self->key_hash) {
         if (self->child_right == NULL) {
@@ -92,11 +107,11 @@ void add_node(node_t* self, node_t* n_node) {
     }
     
     if (self->child_left == NULL) {
-        self->child_right = n_node;
+        self->child_left = n_node;
         return;
     }
 
-    self->child_left = n_node;
+    add_node(self->child_left, n_node);
     return;
 }
 
@@ -157,19 +172,6 @@ size_t get_node_count(node_t* self) {
     return 1 + get_node_count(self->child_left) + get_node_count(self->child_right);
 }
 
-void free_node(node_t* self) {
-    if (self == NULL) {
-        return;
-    }
-
-    btree_free(self->value.value);
-
-    free_node(self->child_left);
-    free_node(self->child_right);
-
-    btree_free(self);
-}
-
 void add_entry(btree_t* self,
  void* key, size_t key_len, 
  void* value, size_t value_len) {
@@ -212,11 +214,11 @@ node_t* delete_node(node_t* root, uint32_t key_hash, void* key, size_t key_len) 
             // Node with only one child or no child
             if (root->child_left == NULL) {
                 node_t* temp = root->child_right;
-                free_node(root);
+                btree_free(root);
                 return temp;
             } else if (root->child_right == NULL) {
                 node_t* temp = root->child_left;
-                free_node(root);
+                btree_free(root);
                 return temp;
             }
 
@@ -274,21 +276,24 @@ size_t get_entry_count(btree_t* self) {
     return get_node_count(self->node);
 }
 
-void free_tree(btree_t* self) {
-    free_node(self->node);
+void free_tree(btree_t** self) {
+    free_node((*self)->node);
 
-    btree_free(self);
+    btree_free(*self);
+    (*self) = NULL;
     return;
 }
 
-void free_entry_list(entry_list_t* list) {
-    for (size_t i=0; i<list->len; i++) {
-        btree_free(list->entries[i].key.key);
-        btree_free(list->entries[i].value.value);
+void free_entry_list(entry_list_t** list) {
+    for (size_t i=0; i<(*list)->len; i++) {
+        btree_free((*list)->entries[i].key.key);
+        btree_free((*list)->entries[i].value.value);
     }
 
-    btree_free(list->entries);
-    btree_free(list);
+    btree_free((*list)->entries);
+    btree_free(*list);
+
+    (*list) = NULL;
 }
 
 

@@ -35,14 +35,11 @@ typedef struct btree btree_t;
 
 btree_t* new_btree();
 node_t* new_node(void* key, size_t key_len, void* value, size_t value_len);
-void add_node(node_t* self, node_t* n_node);
-value_t* find_value(node_t* self, uint32_t key_hash, void* key, size_t key_len);
-void free_node(node_t* self);
 value_t* find_entry(btree_t* self, void* key, size_t key_len);
 void add_entry(btree_t* self, void* key, size_t key_len, void* value, size_t value_len);
-void free_tree(btree_t* self);
+void free_tree(btree_t** self);
 void remove_entry(btree_t* self, void* key, size_t key_len);
 entry_list_t* list_entries(btree_t* self);
 size_t get_entry_count(btree_t* self);
-void free_entry_list(entry_list_t* list);
+void free_entry_list(entry_list_t** list);
 #endif
