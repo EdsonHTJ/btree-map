@@ -42,4 +42,5 @@ void remove_entry(btree_t* self, void* key, size_t key_len);
 entry_list_t* list_entries(btree_t* self);
 size_t get_entry_count(btree_t* self);
 void free_entry_list(entry_list_t** list);
+uint32_t calc_key_hash(void* key, size_t key_len);
 #endif

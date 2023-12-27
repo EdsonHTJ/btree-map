@@ -38,7 +38,7 @@ size_t min_size(size_t a, size_t b) {
     return b;
 }
 
-uint32_t calc_key_hash(void* key, size_t key_len) {
+uint32_t WEAK calc_key_hash(void* key, size_t key_len) {
     uint32_t key_sum = 0;
     uint8_t* byte_key = (uint8_t*) key;
     for (size_t i=0; i<key_len; i++) {
